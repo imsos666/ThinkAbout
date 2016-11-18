@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -30,10 +32,15 @@ import butterknife.ButterKnife;
 
 public class MainActivity extends SwipeRefreshBaseActivity implements CardPickerDialog.ClickListener{
 
+    private static final String TAG = "MainActivity";
+    private static boolean Debug = true;
+
     @BindView(R.id.fab)
     FloatingActionButton mFab;
     @BindView(R.id.drawer_layout)
     DrawerLayout mDrawerLayout;
+    @BindView(R.id.nav_view)
+    NavigationView mNavigationView;
 
     @Override
     protected void initVariabkes() {
@@ -60,9 +67,7 @@ public class MainActivity extends SwipeRefreshBaseActivity implements CardPicker
                 this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawerLayout.setDrawerListener(toggle);
         toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+        mNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
                 return handleNavigationItemSelected(item);
@@ -97,13 +102,14 @@ public class MainActivity extends SwipeRefreshBaseActivity implements CardPicker
             ActivityManager.TaskDescription description = new ActivityManager.TaskDescription(null, null, ThemeUtils.getThemeAttrColor(this, android.R.attr.colorPrimary));
             setTaskDescription(description);
         }
+        mFab.setBackgroundTintList(ThemeUtils.getThemeColorStateList(this,  R.color.theme_color_primary_dark));
+        mNavigationView.setItemIconTintList(ThemeUtils.getThemeColorStateList(this,  R.color.theme_color_primary));
     }
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
+        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+            mDrawerLayout.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
         }
@@ -128,9 +134,7 @@ public class MainActivity extends SwipeRefreshBaseActivity implements CardPicker
         } else if (id == R.id.nav_send) {
 
         }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        mDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 
@@ -153,13 +157,16 @@ public class MainActivity extends SwipeRefreshBaseActivity implements CardPicker
                         @Override
                         public void refreshSpecificView(View view) {
                             //TODO: will do this for each traversal
+                            if(view instanceof FloatingActionButton){
+                                mFab.setBackgroundTintList(ThemeUtils.getThemeColorStateList(view.getContext(),  R.color.theme_color_primary_dark));
+                            }else if (view instanceof NavigationView){
+                                mNavigationView.setItemIconTintList(ThemeUtils.getThemeColorStateList(view.getContext(),  R.color.theme_color_primary));
+                            }
                         }
                     }
             );
         }
     }
-
-
 
     @Override
     public void requestDataRefresh() {
